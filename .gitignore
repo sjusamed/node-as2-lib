@@ -1,0 +1,75 @@
+# create .gitignore file for node.js
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Logs
+logs/
+*.log
+logs/*.log
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Dependency directories
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# dotenv environment variables file
+.env
+.env.test
+.env.*.local
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE specific directories
+.vscode/
+.idea/
+*.sublime-workspace
+
+# TypeScript
+*.tsbuildinfo
+dist/
+out/
+
+# Coverage reports
+coverage/
+
+# Binaries for various tools
+*.exe
+*.out
+*.app
+
+# Build files
+build/
+.tmp/
+
+# Miscellaneous
+*.swp
+*.swo
+*.bak
+*.tmp
+*.orig
+*.rej
+
+# Static files
+public/
+
+# Parcel files
+.cache/
+.parcel-cache/
+
+# Storybook
+.storybook/
