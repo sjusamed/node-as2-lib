@@ -1,12 +1,11 @@
 const axios = require('axios');
-const fs = require('fs');
 const crypto = require('crypto');
 
 // Toggle to enable/disable MDN signature verification
 const requireMdnSignature = true;  // Set to false to skip signature verification
 
 // Encrypt the message with AES and then encrypt the AES key with RSA
-function encryptMessage(plainMessage) {
+function encryptMessage(plainMessage, recipientPublicKey) {
   // Generate a random AES key
   const aesKey = crypto.randomBytes(32); // 32 bytes = 256-bit key for AES-256
 
@@ -17,7 +16,6 @@ function encryptMessage(plainMessage) {
   encryptedMessage += cipher.final('base64');
 
   // Encrypt the AES key using the recipient's public key (RSA)
-  const recipientPublicKey = fs.readFileSync('./certs/recipient_public_key.pem', 'utf-8');
   const encryptedAesKey = crypto.publicEncrypt(recipientPublicKey, aesKey);
 
   return {
@@ -28,8 +26,9 @@ function encryptMessage(plainMessage) {
 }
 
 // Send the AS2 message and handle the MDN
-async function sendAs2Message(plainMessage, recipientUrl) {
-  const { encryptedMessage, encryptedAesKey, iv } = encryptMessage(plainMessage);
+async function sendAs2Message({ plainMessage, recipientUrl, recipientPublicKey, signingCert, privateKey }) {
+  // Encrypt the message using the dynamically provided recipient public key
+  const { encryptedMessage, encryptedAesKey, iv } = encryptMessage(plainMessage, recipientPublicKey);
 
   const payload = {
     encryptedMessage,
@@ -71,13 +70,10 @@ async function sendAs2Message(plainMessage, recipientUrl) {
         console.log('MDN signature is missing. Proceeding without verification.');
       }
     } else {
-      // Load the public key to verify the MDN signature
-      const publicKey = fs.readFileSync('./certs/recipient_public_key.pem', 'utf-8');
-
-      // Verify the signature
+      // Use the dynamically provided recipientPublicKey for signature verification
       const verifier = crypto.createVerify('SHA256');
       verifier.update(mdnBody);
-      const isValid = verifier.verify(publicKey, Buffer.from(mdnSignature, 'base64'));
+      const isValid = verifier.verify(recipientPublicKey, Buffer.from(mdnSignature, 'base64'));
 
       if (isValid) {
         console.log('MDN signature is valid.');
